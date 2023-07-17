@@ -1,0 +1,32 @@
+version: '3'
+services:
+
+  helloapi:
+    build:
+      context: helloapi
+    # XXX Do not expose in production
+    #ports:
+    #- "8091:8080"
+
+  welcomeapi:
+    build:
+      context: welcomeapi
+    # XXX Do not expose in production
+    #ports:
+    #- "8092:8080"
+
+  apigate:
+    image: nginx
+    volumes:
+      - ./gatewayconf:/etc/nginx
+    ports:
+      - "8090:80"
+    depends_on:
+      - helloapi
+      - welcomeapi
+    deploy:
+      # Best practice because it is possible that upstreams aren't ready yet
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 10
